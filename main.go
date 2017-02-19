@@ -24,9 +24,17 @@ type BusinessesSearchResponse struct {
 }
 
 func main() {
-	yelp.Test()
 	fmt.Println("testing 1 2 3")
-	//
+	yelp.ShowAllCategoriesLen()
+	zcs := yelp.GetAllZipCodes()
+
+
+	fmt.Println(zcs)
+	for _, zc := range zcs {
+		fmt.Println(zc)
+	}
+
+
 	// viper.SetConfigName("_config") // name of config file (without extension)
 	// viper.AddConfigPath(".")       // optionally look for config in the working directory
 	// err := viper.ReadInConfig()    // Find and read the config file

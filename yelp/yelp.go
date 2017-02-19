@@ -9,6 +9,6 @@ func init() {
 }
 
 
-func Test() {
-  fmt.Println("allCategories", len(allCategories))
+func ShowAllCategoriesLen() {
+  fmt.Println("ShowAllCategoriesLen: allCategories", len(allCategories))
 }
