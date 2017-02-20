@@ -9,8 +9,8 @@ func GetLatestLog() Log {
 	db := db.GetDB()
 	rows, err := db.Query(`
 		select *
-    from yelpLogBusinessSearch l
-    order by isDone, modifiedAt desc
+    from YelpLogBusinessSearch l
+    order by IsDone, ModifiedAt desc
 		limit 1
 		;
 	`)
@@ -21,7 +21,6 @@ func GetLatestLog() Log {
 	defer rows.Close()
 
 	var lg Log
-
 	for rows.Next() {
 		err := rows.Scan(&lg.Id, &lg.ZipCode, &lg.Alias, &lg.Limit, &lg.Offset, &lg.IsDone, &lg.Error, &lg.CreatedAt, &lg.ModifiedAt)
 		if err != nil {

@@ -19,24 +19,33 @@ type BusinessesSearchResponse struct {
 }
 
 func main() {
-	fmt.Println("testing 1 2 3")
-	fmt.Println("\n")
 
 	var zc yelp.ZipCode
 	lg := yelp.GetLatestLog()
+
 	fmt.Println("lg", lg)
-	fmt.Println("lg.ZipCode", lg.ZipCode)
 	if lg.ZipCode != 0 {
 		zc.ZipCode = lg.ZipCode
 		zc.InitWithZipCode()
-		fmt.Println("lg -> zc", zc)
+
+		fmt.Println("zc", zc)
+		filteredCategories := zc.GetValidCategories()
+		fmt.Println("filteredCategories", len(filteredCategories))
+
+		if lg.IsDone && lg.Alias ==  filteredCategories[len(filteredCategories) - 1].Alias {
+			fmt.Println("set zipcode forced")
+			lg.IsDone = false
+			lg.Update()
+		} else {
+			fmt.Println("continue from log")
+			lg.IsDone = true
+			lg.Update()
+		}
+	} else {
+		fmt.Println("set zipcode forced")
 	}
 
-	filterdCategories := zc.GetValidCategories()
-	fmt.Println("filterdCategories", len(filterdCategories))
-	// for _, c := range filterdCategories {
-	// 	fmt.Println(c)
-	// }
+
 
 	fmt.Println("\n")
 
@@ -45,7 +54,9 @@ func main() {
 
 	fmt.Println("\n")
 
-
+	// for _, c := range filteredCategories {
+	// 	fmt.Println(c)
+	// }
 
 
 	// viper.SetConfigName("_config") // name of config file (without extension)

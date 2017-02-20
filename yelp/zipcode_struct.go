@@ -39,8 +39,8 @@ func (z *ZipCode) InitWithZipCode() {
 	db := db.GetDB()
 	rows, err := db.Query(`
 		select zc.*
-		from zipCode zc
-		where ?=zc.zipCode
+		from ZipCode zc
+		where ?=zc.ZipCode
 		limit 1
 		;
 	`, z.ZipCode)
