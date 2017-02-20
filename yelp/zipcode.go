@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"time"
+	"amasia/helpers"
 )
 
 type ZipCode struct {
@@ -15,8 +16,25 @@ type ZipCode struct {
 	ModifiedAt              time.Time
 }
 
-func (z *ZipCode) getValidCategories() {
-	fmt.Println("getValidCategories for", z)
+func (z ZipCode) GetValidCategories() CategoriesConfig {
+	fmt.Println("GetValidCategories for", z)
+	var cc CategoriesConfig
+
+	for _, c := range allCategoriesConfig {
+		var toKeep = false
+		if len(c.CountryWhitelist) == 0 || helpers.StringInSlice(z.Country, c.CountryWhitelist) {
+			toKeep = true;
+		}
+
+		if len(c.CountryBlacklist) == 0 && helpers.StringInSlice(z.Country, c.CountryBlacklist) {
+			toKeep = false;
+		}
+
+		if toKeep {
+			cc = append(cc, c)
+		}
+	}
+	return cc
 }
 
 func (z *ZipCode) GetWithZipCode() {

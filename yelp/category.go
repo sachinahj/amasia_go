@@ -10,6 +10,7 @@ type CategoryConfig struct {
 	Alias            string   `json:"alias"`
 	Title            string   `json:"title"`
 	CountryWhitelist []string `json:"country_whitelist"`
+	CountryBlacklist []string `json:"country_blacklist"`
 	Parents          []string `json:"parents"`
 }
 
@@ -24,7 +25,7 @@ type Category struct {
 type CategoriesConfig []CategoryConfig
 type Categories []Category
 
-var allCategories CategoriesConfig
+var allCategoriesConfig CategoriesConfig
 
 func init() {
 	file, err := ioutil.ReadFile("yelp/categories.json")
@@ -33,5 +34,5 @@ func init() {
 		log.Fatal(err)
 	}
 
-	json.Unmarshal(file, &allCategories)
+	json.Unmarshal(file, &allCategoriesConfig)
 }

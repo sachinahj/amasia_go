@@ -1,13 +1,8 @@
 package main
 
 import (
-	// "encoding/json"
 	"fmt"
-	// "io/ioutil"
-	// "net/http"
-
 	"amasia/yelp"
-	// "github.com/spf13/viper"
 )
 
 type Business struct {
@@ -27,27 +22,30 @@ func main() {
 	fmt.Println("testing 1 2 3")
 	fmt.Println("\n")
 
+	var zc yelp.ZipCode
 	lg := yelp.GetLatestLog()
 	fmt.Println("lg", lg)
 	fmt.Println("lg.ZipCode", lg.ZipCode)
 	if lg.ZipCode != 0 {
-		var zc = yelp.ZipCode{ZipCode: lg.ZipCode}
+		zc.ZipCode = lg.ZipCode
 		zc.GetWithZipCode()
 		fmt.Println("lg -> zc", zc)
 	}
 
+	filterdCategories := zc.GetValidCategories()
+	fmt.Println("filterdCategories", len(filterdCategories))
+	// for _, c := range filterdCategories {
+	// 	fmt.Println(c)
+	// }
+
 	fmt.Println("\n")
 
-	zc := yelp.GetOldestUpdatedZipCode()
-	fmt.Println("zc", zc)
+	// zc := yelp.GetOldestUpdatedZipCode()
+	// fmt.Println("zc", zc)
 
 	fmt.Println("\n")
 
-	zcs := yelp.GetAllZipCodes()
-	fmt.Println("zcs", zcs)
-	for _, zc := range zcs {
-		fmt.Println(zc)
-	}
+
 
 
 	// viper.SetConfigName("_config") // name of config file (without extension)
