@@ -21,7 +21,8 @@ type BusinessesSearchResponse struct {
 func main() {
 
 	var zc yelp.ZipCode
-	lg := yelp.GetLatestLog()
+	var lg yelp.Log
+	lg.InitWithLatestBusinessesSearch()
 
 	fmt.Println("lg", lg)
 	if lg.ZipCode != 0 {
@@ -32,7 +33,11 @@ func main() {
 		filteredCategories := zc.GetValidCategories()
 		fmt.Println("filteredCategories", len(filteredCategories))
 
-		if lg.IsDone && lg.Alias ==  filteredCategories[len(filteredCategories) - 1].Alias {
+		lgc := lg.GetConfigBusinessesSearch()
+		fmt.Println("lgc", lgc)
+		fmt.Println("lgc.Alias", lgc.Alias)
+
+		if lg.IsDone && lgc.Alias ==  filteredCategories[len(filteredCategories) - 1].Alias {
 			fmt.Println("set zipcode forced")
 			lg.IsDone = false
 			lg.Update()

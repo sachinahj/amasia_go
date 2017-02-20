@@ -12,20 +12,21 @@ func GetOldestUpdatedZipCode() ZipCode {
 		from ZipCode zc
 		left join
 		(
-			select l.Id, l.ZipCode, l.Alias, temp.MaxModifiedAt
-			from yelpLogBusinessSearch l
-			inner join
-			(
-				select max(modifiedAt) as MaxModifiedAt, ZipCode
-				from yelpLogBusinessSearch l
-				group by l.ZipCode
-			) temp
-			on l.ZipCode = temp.ZipCode and l.modifiedAt = temp.MaxModifiedAt
-			group by l.ZipCode
-			order by temp.MaxModifiedAt desc
+		  select l.Id, l.ZipCode, temp.MaxCreatedAt
+		  from Log l
+		  inner join
+		  (
+		    select max(CreatedAt) as MaxCreatedAt, ZipCode
+		    from Log l
+		    where type="businesses_search"
+		    group by l.ZipCode
+		  ) temp
+		  on l.ZipCode = temp.ZipCode and l.CreatedAt = temp.MaxCreatedAt
+		  group by l.ZipCode
+		  order by temp.MaxCreatedAt desc
 		) temp2
 		on zc.ZipCode=temp2.ZipCode
-		order by temp2.MaxModifiedAt asc, ZipCode asc
+		order by temp2.MaxCreatedAt asc, ZipCode asc
 		limit 1
 		;
 	`)
