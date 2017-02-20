@@ -35,7 +35,7 @@ func (z ZipCode) GetValidCategories() CategoriesConfig {
 	return cc
 }
 
-func (z *ZipCode) GetWithZipCode() {
+func (z *ZipCode) InitWithZipCode() {
 	db := db.GetDB()
 	rows, err := db.Query(`
 		select zc.*

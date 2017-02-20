@@ -28,7 +28,7 @@ func main() {
 	fmt.Println("lg.ZipCode", lg.ZipCode)
 	if lg.ZipCode != 0 {
 		zc.ZipCode = lg.ZipCode
-		zc.GetWithZipCode()
+		zc.InitWithZipCode()
 		fmt.Println("lg -> zc", zc)
 	}
 
