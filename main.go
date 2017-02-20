@@ -25,11 +25,26 @@ type BusinessesSearchResponse struct {
 
 func main() {
 	fmt.Println("testing 1 2 3")
-	yelp.ShowAllCategoriesLen()
+	fmt.Println("\n")
+
+	lg := yelp.GetLatestLog()
+	fmt.Println("lg", lg)
+	fmt.Println("lg.ZipCode", lg.ZipCode)
+	if lg.ZipCode != 0 {
+		var zc = yelp.ZipCode{ZipCode: lg.ZipCode}
+		zc.GetWithZipCode()
+		fmt.Println("lg -> zc", zc)
+	}
+
+	fmt.Println("\n")
+
+	zc := yelp.GetOldestUpdatedZipCode()
+	fmt.Println("zc", zc)
+
+	fmt.Println("\n")
+
 	zcs := yelp.GetAllZipCodes()
-
-
-	fmt.Println(zcs)
+	fmt.Println("zcs", zcs)
 	for _, zc := range zcs {
 		fmt.Println(zc)
 	}
