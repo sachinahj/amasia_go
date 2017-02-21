@@ -55,7 +55,7 @@ func (l *Log) InitWithLatestBusinessesSearch() {
 	rows, err := db.Query(`
 		select *
     from Log l
-    order by IsDone, ModifiedAt desc
+    order by IsDone, CreatedAt desc
 		limit 1
 		;
 	`)

@@ -1,5 +1,7 @@
 package yelp
 
+import "fmt"
+
 type CategoryConfig struct {
 	Alias            string   `json:"alias"`
 	Title            string   `json:"title"`
@@ -9,12 +11,14 @@ type CategoryConfig struct {
 }
 
 type Category struct {
-	Id         string
-	Alias      string
-	Title      string
+	Alias      string `json:"alias"`
+	Title      string `json:"title"`
 	CreatedAt  string
 	ModifiedAt string
 }
 
-type CategoriesConfig []CategoryConfig
-type Categories []Category
+func (c *Category) Update() {
+
+	fmt.Println("update this shit", c)
+
+}

@@ -15,8 +15,8 @@ type ZipCode struct {
 	ModifiedAt              time.Time
 }
 
-func (z ZipCode) GetValidCategories() CategoriesConfig {
-	var cc CategoriesConfig
+func (z ZipCode) GetValidCategories() []CategoryConfig {
+	var cc []CategoryConfig
 
 	for _, c := range allCategoriesConfig {
 		var toKeep = false

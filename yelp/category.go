@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-var allCategoriesConfig CategoriesConfig
+var allCategoriesConfig []CategoryConfig
 
 func init() {
 	file, err := ioutil.ReadFile("yelp/categories.json")
