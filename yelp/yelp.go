@@ -3,47 +3,41 @@ package yelp
 import "fmt"
 
 func Start() {
+	fmt.Println("=================================================")
 	var zc ZipCode
 	zc.InitWithForceBusinessesSearch()
-	fmt.Println("zc", zc)
 
 	var lg Log
 	if zc.ZipCode != 0 {
-		lg = zc.InsertLogBusinessesSearch()
+		fmt.Println("---Forced ZipCode \n", zc)
+		lg.ZipCode = zc.ZipCode
+		lg.InitWithNewBusinessesSearch()
+		lg.Insert()
 	} else {
 		lg.InitWithLatestBusinessesSearch()
+		fmt.Println("---No Forced ZipCode, Latest Log Businesses Search \n", lg)
 	}
 
-	fmt.Println("lg", lg)
-	lgc := lg.GetConfigBusinessesSearch()
-	fmt.Println("lgc", lgc)
-
-	// Run(lg)
-}
-
-func Run(lg Log) {
-	fmt.Println("lg", lg)
-
-	var zc ZipCode
-	if lg.ZipCode != 0 {
-		zc.ZipCode = lg.ZipCode
-		zc.InitWithZipCode()
-
-		fmt.Println("zc", zc)
-		filteredCategories := zc.GetValidCategories()
-		fmt.Println("filteredCategories", len(filteredCategories))
-
-		lgc := lg.GetConfigBusinessesSearch()
-		fmt.Println("lgc", lgc)
-		fmt.Println("lgc.Alias", lgc.Alias)
-
-		if lg.IsDone && lgc.Alias == filteredCategories[len(filteredCategories)-1].Alias {
-			fmt.Println("set zipcode forced")
-		} else {
-			fmt.Println("continue from log")
-			BusinessesSearch(zc, lgc)
-		}
-	} else {
-		fmt.Println("set zipcode forced")
+	if lg.ZipCode == 0 {
+		zc.InitWithOldestBusinessesSearch()
+		lg.ZipCode = zc.ZipCode
+		lg.InitWithNewBusinessesSearch()
+		lg.Insert()
+		fmt.Println("---No Latest Log, Oldest ZipCode Log \n", lg)
 	}
+
+	if lg.Id == 0 {
+		fmt.Println("---Nothing to do \n")
+		return
+	}
+
+	if !lg.IsDone {
+		BusinessesSearch(&lg)
+		lg.IsDone = true
+		lg.Update()
+	}
+
+	lg.InitWithNextLog()
+	lg.Insert()
+	Start()
 }

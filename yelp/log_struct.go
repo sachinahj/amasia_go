@@ -3,20 +3,20 @@ package yelp
 import (
 	"amasia/db"
 	"encoding/json"
-	"fmt"
 	"log"
 	"time"
 )
 
 type Log struct {
-	Id         int64
-	ZipCode    int
-	Type       string
-	Config     []byte
-	IsDone     bool
-	Error      string
-	CreatedAt  time.Time
-	ModifiedAt time.Time
+	Id             int64
+	ZipCode        int
+	Type           string
+	Config         []byte
+	IsDone         bool
+	Error          string
+	IsDoneCategory bool
+	CreatedAt      time.Time
+	ModifiedAt     time.Time
 }
 
 type LogConfigBusinessesSearch struct {
@@ -56,7 +56,6 @@ func (l *Log) Insert() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("id", id)
 
 	l.Id = id
 	l.CreatedAt = now
@@ -96,7 +95,7 @@ func (l *Log) InitWithLatestBusinessesSearch() {
 	rows, err := db.Query(`
 		SELECT *
     FROM Log l
-    ORDER BY IsDone, ModifiedAt DESC
+    ORDER BY IsDone ASC, ModifiedAt DESC
 		LIMIT 1
 		;
 	`)
@@ -119,6 +118,59 @@ func (l *Log) InitWithLatestBusinessesSearch() {
 	}
 
 	rows.Close()
+}
+
+func (l *Log) InitWithNextLog() {
+	var zc = ZipCode{ZipCode: l.ZipCode}
+
+	zc.InitWithZipCode()
+	lgc := l.GetConfigBusinessesSearch()
+	filteredCategories := zc.GetValidCategories()
+
+	var i int
+	var c CategoryConfig
+	if l.IsDoneCategory {
+		for i, c = range filteredCategories {
+			if c.Alias == lgc.Alias {
+				break
+			}
+		}
+
+		lgc = LogConfigBusinessesSearch{Alias: filteredCategories[i+1].Alias, Limit: 50, Offset: 0}
+	} else {
+		lgc = LogConfigBusinessesSearch{Alias: lgc.Alias, Limit: 50, Offset: (lgc.Offset + 50)}
+	}
+
+	lgc_byte, err := json.Marshal(lgc)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	l.Id = 0
+	l.ZipCode = zc.ZipCode
+	l.Type = "businesses_search"
+	l.Config = lgc_byte
+	l.IsDone = false
+	l.Error = ""
+}
+
+func (l *Log) InitWithNewBusinessesSearch() {
+	var zc = ZipCode{ZipCode: l.ZipCode}
+	zc.InitWithZipCode()
+	filteredCategories := zc.GetValidCategories()
+
+	lgc := LogConfigBusinessesSearch{Alias: filteredCategories[0].Alias, Limit: 50, Offset: 0}
+	lgc_byte, err := json.Marshal(lgc)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	l.Id = 0
+	l.ZipCode = zc.ZipCode
+	l.Type = "businesses_search"
+	l.Config = lgc_byte
+	l.IsDone = false
+	l.Error = ""
 }
 
 func (l Log) GetConfigBusinessesSearch() LogConfigBusinessesSearch {

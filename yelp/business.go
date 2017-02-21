@@ -16,7 +16,7 @@ type BusinessesSearchResponse struct {
 	Businesses []Business `json:"businesses"`
 }
 
-func BusinessesSearch(zc ZipCode, lg LogConfigBusinessesSearch) {
+func BusinessesSearch(lg *Log) {
 	viper.SetConfigName("_config") // name of config file (without extension)
 	viper.AddConfigPath(".")       // optionally look for config in the working directory
 	err := viper.ReadInConfig()    // Find and read the config file
@@ -35,12 +35,14 @@ func BusinessesSearch(zc ZipCode, lg LogConfigBusinessesSearch) {
 
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %v", accessToken))
 
+	lgc := lg.GetConfigBusinessesSearch()
+
 	q := req.URL.Query()
-	q.Add("location", strconv.Itoa(zc.ZipCode))
+	q.Add("offset", strconv.Itoa(lgc.Offset))
+	q.Add("limit", strconv.Itoa(lgc.Limit))
+	q.Add("categories", lgc.Alias)
+	q.Add("location", strconv.Itoa(lg.ZipCode))
 	q.Add("sort_by", "rating")
-	q.Add("offset", strconv.Itoa(lg.Offset))
-	q.Add("limit", strconv.Itoa(lg.Limit))
-	q.Add("categories", lg.Alias)
 	req.URL.RawQuery = q.Encode()
 
 	fmt.Println("req.URL.String()", req.URL.String())
@@ -58,15 +60,18 @@ func BusinessesSearch(zc ZipCode, lg LogConfigBusinessesSearch) {
 		log.Fatal(err)
 	}
 
+	if len(bsr.Businesses) <= 50 {
+		lg.IsDoneCategory = true
+	}
+
 	var categories = make(map[string]Category)
 	var businessCategories []BusinessCategory
 
 	fmt.Println("-----", "Businesses", len(bsr.Businesses))
 	for _, b := range bsr.Businesses {
-		b.ZipCode = zc.ZipCode
+		b.ZipCode = lg.ZipCode
 
 		b.Update()
-		fmt.Println(b)
 
 		for _, c := range b.Categories {
 			bc := BusinessCategory{BusinessId: b.Id, CategoryAlias: c.Alias}
@@ -78,12 +83,11 @@ func BusinessesSearch(zc ZipCode, lg LogConfigBusinessesSearch) {
 	fmt.Println("-----", "Categories", len(categories))
 	for _, c := range categories {
 		c.Update()
-		fmt.Println(c)
 	}
 
 	fmt.Println("-----", "BusinessCategories", len(businessCategories))
 	for _, bc := range businessCategories {
 		bc.Update()
-		fmt.Println(bc)
 	}
+
 }

@@ -3,8 +3,6 @@ package yelp
 import (
 	"amasia/db"
 	"amasia/helpers"
-	"encoding/json"
-	"fmt"
 	"log"
 	"time"
 )
@@ -138,19 +136,4 @@ func (z *ZipCode) InitWithForceBusinessesSearch() {
 	}
 
 	rows.Close()
-}
-
-func (z *ZipCode) InsertLogBusinessesSearch() Log {
-	filteredCategories := z.GetValidCategories()
-	lgc := LogConfigBusinessesSearch{Alias: filteredCategories[0].Alias, Limit: 50, Offset: 0}
-	fmt.Println("lgc", lgc)
-	lgc_byte, err := json.Marshal(lgc)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("lgc_byte", lgc_byte)
-	lg := Log{ZipCode: z.ZipCode, Type: "businesses_search", Config: lgc_byte, IsDone: false, Error: ""}
-	lg.Insert()
-	lg.Update()
-	return lg
 }
