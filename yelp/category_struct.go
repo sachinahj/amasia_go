@@ -22,20 +22,15 @@ type Category struct {
 }
 
 func (c *Category) Update() {
-
 	db := db.GetDB()
-
 	now := time.Now()
-
 	rows, err := db.Query(`
-		INSERT INTO Category
-		(
+		INSERT INTO Category (
 	    Alias,
 	    Title,
 			CreatedAt,
 			ModifiedAt
-	  ) VALUES
-	  (
+	  ) VALUES (
 	    ?,
 	    ?,
 			?,

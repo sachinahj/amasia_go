@@ -61,7 +61,7 @@ func BusinessesSearch(zc ZipCode, lg LogConfigBusinessesSearch) {
 	var categories = make(map[string]Category)
 	var businessCategories []BusinessCategory
 
-	fmt.Println("---------------------------", "Businesses")
+	fmt.Println("-----", "Businesses", len(bsr.Businesses))
 	for _, b := range bsr.Businesses {
 		b.ZipCode = zc.ZipCode
 
@@ -75,13 +75,13 @@ func BusinessesSearch(zc ZipCode, lg LogConfigBusinessesSearch) {
 		}
 	}
 
-	fmt.Println("---------------------------", "Categories")
+	fmt.Println("-----", "Categories", len(categories))
 	for _, c := range categories {
 		c.Update()
 		fmt.Println(c)
 	}
 
-	fmt.Println("---------------------------", "BusinessCategories")
+	fmt.Println("-----", "BusinessCategories", len(businessCategories))
 	for _, bc := range businessCategories {
 		bc.Update()
 		fmt.Println(bc)

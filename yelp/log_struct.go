@@ -3,12 +3,13 @@ package yelp
 import (
 	"amasia/db"
 	"encoding/json"
+	"fmt"
 	"log"
 	"time"
 )
 
 type Log struct {
-	Id         int
+	Id         int64
 	ZipCode    int
 	Type       string
 	Config     []byte
@@ -24,8 +25,47 @@ type LogConfigBusinessesSearch struct {
 	Offset int
 }
 
+func (l *Log) Insert() {
+	db := db.GetDB()
+	now := time.Now()
+	res, err := db.Exec(`
+		INSERT INTO Log (
+			ZipCode,
+			Type,
+			Config,
+			IsDone,
+			Error,
+			CreatedAt,
+			ModifiedAt
+		) VALUES (
+			?,
+			?,
+			?,
+			?,
+			?,
+			?,
+			?
+		)
+		;
+	`, l.ZipCode, l.Type, l.Config, l.IsDone, l.Error, now, now)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("id", id)
+
+	l.Id = id
+	l.CreatedAt = now
+	l.ModifiedAt = now
+}
+
 func (l Log) Update() {
 	db := db.GetDB()
+	now := time.Now()
 	rows, err := db.Query(`
 		UPDATE Log l
 		SET
@@ -36,7 +76,7 @@ func (l Log) Update() {
 			l.ModifiedAt=?
 		WHERE l.Id=?
 		;
-	`, l.ZipCode, l.Config, l.IsDone, l.Error, time.Now(), l.Id)
+	`, l.ZipCode, l.Config, l.IsDone, l.Error, now, l.Id)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -48,6 +88,7 @@ func (l Log) Update() {
 	}
 
 	rows.Close()
+	l.ModifiedAt = now
 }
 
 func (l *Log) InitWithLatestBusinessesSearch() {
@@ -55,7 +96,7 @@ func (l *Log) InitWithLatestBusinessesSearch() {
 	rows, err := db.Query(`
 		SELECT *
     FROM Log l
-    ORDER BY IsDone, CreatedAt DESC
+    ORDER BY IsDone, ModifiedAt DESC
 		LIMIT 1
 		;
 	`)
@@ -82,7 +123,8 @@ func (l *Log) InitWithLatestBusinessesSearch() {
 
 func (l Log) GetConfigBusinessesSearch() LogConfigBusinessesSearch {
 	var lc LogConfigBusinessesSearch
-	err := json.Unmarshal([]byte(l.Config), &lc)
+	// can i delete the []byte
+	err := json.Unmarshal(l.Config, &lc)
 	if err != nil {
 		log.Fatal(err)
 	}

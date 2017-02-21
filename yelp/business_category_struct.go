@@ -14,20 +14,15 @@ type BusinessCategory struct {
 }
 
 func (bc *BusinessCategory) Update() {
-
 	db := db.GetDB()
-
 	now := time.Now()
-
 	rows, err := db.Query(`
-		INSERT INTO BusinessCategory
-		(
+		INSERT INTO BusinessCategory (
 	    BusinessId,
 	    CategoryAlias,
 			CreatedAt,
 			ModifiedAt
-	  ) VALUES
-	  (
+	  ) VALUES (
 	    ?,
 	    ?,
 			?,

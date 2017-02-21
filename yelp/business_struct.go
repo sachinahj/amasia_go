@@ -30,13 +30,10 @@ type Business struct {
 
 func (b *Business) Update() {
 	db := db.GetDB()
-
 	now := time.Now()
 	price := len(b.Price)
-
 	rows, err := db.Query(`
-		INSERT INTO Business
-		(
+		INSERT INTO Business (
       Id,
       ZipCode,
       Name,
@@ -51,8 +48,7 @@ func (b *Business) Update() {
       CoordinatesLongitude,
       CreatedAt,
       ModifiedAt
-    ) VALUES
-    (
+    ) VALUES (
       ?,
       ?,
       ?,
