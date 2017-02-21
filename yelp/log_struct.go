@@ -27,14 +27,14 @@ type LogConfigBusinessesSearch struct {
 func (l Log) Update() {
 	db := db.GetDB()
 	rows, err := db.Query(`
-		update Log l
-		set
+		UPDATE Log l
+		SET
 			l.ZipCode=?,
 			l.Config=?,
 			l.IsDone=?,
 			l.Error=?,
 			l.ModifiedAt=?
-		where l.Id=?
+		WHERE l.Id=?
 		;
 	`, l.ZipCode, l.Config, l.IsDone, l.Error, time.Now(), l.Id)
 	if err != nil {
@@ -53,10 +53,10 @@ func (l Log) Update() {
 func (l *Log) InitWithLatestBusinessesSearch() {
 	db := db.GetDB()
 	rows, err := db.Query(`
-		select *
-    from Log l
-    order by IsDone, CreatedAt desc
-		limit 1
+		SELECT *
+    FROM Log l
+    ORDER BY IsDone, CreatedAt DESC
+		LIMIT 1
 		;
 	`)
 

@@ -11,6 +11,11 @@ import (
 	"github.com/spf13/viper"
 )
 
+type BusinessesSearchResponse struct {
+	Total      int64      `json:"total"`
+	Businesses []Business `json:"businesses"`
+}
+
 func BusinessesSearch(zc ZipCode, lg LogConfigBusinessesSearch) {
 	viper.SetConfigName("_config") // name of config file (without extension)
 	viper.AddConfigPath(".")       // optionally look for config in the working directory
@@ -56,31 +61,29 @@ func BusinessesSearch(zc ZipCode, lg LogConfigBusinessesSearch) {
 	var categories = make(map[string]Category)
 	var businessCategories []BusinessCategory
 
+	fmt.Println("---------------------------", "Businesses")
 	for _, b := range bsr.Businesses {
 		b.ZipCode = zc.ZipCode
 
-		fmt.Println("---------------------------")
-		fmt.Println(b)
 		b.Update()
+		fmt.Println(b)
 
 		for _, c := range b.Categories {
 			bc := BusinessCategory{BusinessId: b.Id, CategoryAlias: c.Alias}
 			businessCategories = append(businessCategories, bc)
 			categories[c.Alias] = c
-			fmt.Println(bc)
 		}
 	}
 
-	fmt.Println("---------------------------")
-	fmt.Println(categories)
+	fmt.Println("---------------------------", "Categories")
 	for _, c := range categories {
-		fmt.Println(c)
 		c.Update()
+		fmt.Println(c)
 	}
 
-	fmt.Println("---------------------------")
+	fmt.Println("---------------------------", "BusinessCategories")
 	for _, bc := range businessCategories {
-		fmt.Println(bc)
 		bc.Update()
+		fmt.Println(bc)
 	}
 }

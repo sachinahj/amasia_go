@@ -6,11 +6,6 @@ import (
 	"time"
 )
 
-type BusinessesSearchResponse struct {
-	Total      int64      `json:"total"`
-	Businesses []Business `json:"businesses"`
-}
-
 type Business struct {
 	Id          string `json:"id"`
 	ZipCode     int

@@ -12,11 +12,11 @@ import (
 var db *sql.DB
 
 func init() {
-	host := config.Get("database.main.host")
-	port := config.Get("database.main.port")
-	username := config.Get("database.main.username")
-	password := config.Get("database.main.password")
-	database := config.Get("database.main.database")
+	host := config.Get("database.yelp.host")
+	port := config.Get("database.yelp.port")
+	username := config.Get("database.yelp.username")
+	password := config.Get("database.yelp.password")
+	database := config.Get("database.yelp.database")
 
 	connectionUrl := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?parseTime=true", username, password, host, port, database)
 	fmt.Println("db: connectionUrl", connectionUrl)

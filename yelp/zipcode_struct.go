@@ -38,10 +38,10 @@ func (z ZipCode) GetValidCategories() []CategoryConfig {
 func (z *ZipCode) InitWithZipCode() {
 	db := db.GetDB()
 	rows, err := db.Query(`
-		select zc.*
-		from ZipCode zc
-		where ?=zc.ZipCode
-		limit 1
+		SELECT zc.*
+		FROM ZipCode zc
+		WHERE ?=zc.ZipCode
+		LIMIT 1
 		;
 	`, z.ZipCode)
 	if err != nil {

@@ -8,26 +8,26 @@ import (
 func GetOldestUpdatedZipCode() ZipCode {
 	db := db.GetDB()
 	rows, err := db.Query(`
-		select zc.*
-		from ZipCode zc
-		left join
+		SELECT zc.*
+		FROM ZipCode zc
+		LEFT JOIN
 		(
-		  select l.Id, l.ZipCode, temp.MaxCreatedAt
-		  from Log l
-		  inner join
+		  SELECT l.Id, l.ZipCode, temp.MaxCreatedAt
+		  FROM Log l
+		  INNER JOIN
 		  (
-		    select max(CreatedAt) as MaxCreatedAt, ZipCode
-		    from Log l
-		    where type="businesses_search"
-		    group by l.ZipCode
+		    SELECT max(CreatedAt) AS MaxCreatedAt, ZipCode
+		    FROM Log l
+		    WHERE type="businesses_search"
+		    GROUP BY l.ZipCode
 		  ) temp
-		  on l.ZipCode = temp.ZipCode and l.CreatedAt = temp.MaxCreatedAt
-		  group by l.ZipCode
-		  order by temp.MaxCreatedAt desc
+		  ON l.ZipCode = temp.ZipCode and l.CreatedAt = temp.MaxCreatedAt
+		  GROUP BY l.ZipCode
+		  ORDER BY temp.MaxCreatedAt desc
 		) temp2
-		on zc.ZipCode=temp2.ZipCode
-		order by temp2.MaxCreatedAt asc, ZipCode asc
-		limit 1
+		ON zc.ZipCode=temp2.ZipCode
+		ORDER BY temp2.MaxCreatedAt ASC, ZipCode ASC
+		LIMIT 1
 		;
 	`)
 	if err != nil {
@@ -52,30 +52,3 @@ func GetOldestUpdatedZipCode() ZipCode {
 	rows.Close()
 	return zc
 }
-
-// func GetAllZipCodes() []*ZipCode {
-// 	db := db.GetDB()
-// 	rows, err := db.Query("select * from zipCode")
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	defer rows.Close()
-//
-// 	zipCodes := make([]*ZipCode, 0)
-// 	for rows.Next() {
-// 		zc := new(ZipCode)
-// 		err := rows.Scan(&zc.ZipCode, &zc.Country, &zc.ForceYelpBusinessSearch, &zc.CreatedAt, &zc.ModifiedAt)
-// 		if err != nil {
-// 			log.Fatal(err)
-// 		}
-// 		zipCodes = append(zipCodes, zc)
-// 	}
-//
-// 	err = rows.Err()
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-//
-// 	rows.Close()
-// 	return zipCodes
-// }

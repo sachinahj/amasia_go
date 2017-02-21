@@ -4,7 +4,7 @@
   },
 
   "database": {
-    "main": {
+    "yelp": {
       "host": "amazia.cxyteuivirsv.us-east-1.rds.amazonaws.com",
       "port": "3306",
       "username": "amazia",
