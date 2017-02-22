@@ -3,7 +3,6 @@ package yelp
 import (
 	"amasia/db"
 	"amasia/helpers"
-	"fmt"
 	"log"
 	"time"
 )
@@ -17,7 +16,40 @@ type ZipCode struct {
 }
 
 func (z ZipCode) Analyze() {
-	fmt.Println("analyze this bihh", z)
+	db := db.GetDB()
+
+	_, err := db.Exec(`
+		INSERT INTO amasia.ZipCodeCategories
+		(
+      ZipCode,
+      Alias,
+      Count
+    )
+		(
+			SELECT
+			  b.LocationZipCode as ZipCode,
+			  yct.AliasLevel4 as Alias,
+			  count(yct.AliasLevel4) as Count
+
+			FROM Business b
+
+			JOIN BusinessCategory bc ON b.Id=bc.BusinessId
+			JOIN Category yc ON yc.Alias=bc.CategoryAlias
+			JOIN CategoryTree yct ON yct.AliasLevel4=yc.Alias
+
+			AND b.LocationZipCode=78701
+
+			GROUP BY b.LocationZipCode, yct.AliasLevel4
+			ORDER BY b.LocationZipCode, Count DESC
+		) ON DUPLICATE KEY UPDATE
+		Count=Values(Count)
+		;
+	`)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }
 
 func (z ZipCode) GetValidCategories() []CategoryConfig {

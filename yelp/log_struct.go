@@ -3,7 +3,6 @@ package yelp
 import (
 	"amasia/db"
 	"encoding/json"
-	"fmt"
 	"log"
 	"time"
 )
@@ -185,7 +184,7 @@ func (l *Log) InitWithNextLog() {
 
 	switch l.Type {
 	case "businesses_search":
-		lgcbs := l.GetConfigBusinessesSearch()
+		lgcbs = l.GetConfigBusinessesSearch()
 		filteredCategories := zc.GetValidCategories()
 
 		var i int
@@ -198,8 +197,6 @@ func (l *Log) InitWithNextLog() {
 				}
 			}
 
-			fmt.Println("i", i)
-			fmt.Println("len(filteredCategories)", len(filteredCategories))
 			if i+1 < len(filteredCategories) {
 				lgcbs = LogConfigBusinessesSearch{Alias: filteredCategories[i+1].Alias, Limit: 50, Offset: 0}
 			} else {
