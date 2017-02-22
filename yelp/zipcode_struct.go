@@ -3,6 +3,7 @@ package yelp
 import (
 	"amasia/db"
 	"amasia/helpers"
+	"fmt"
 	"log"
 	"time"
 )
@@ -13,6 +14,10 @@ type ZipCode struct {
 	ForceBusinessesSearch bool
 	CreatedAt             time.Time
 	ModifiedAt            time.Time
+}
+
+func (z ZipCode) Analyze() {
+	fmt.Println("analyze this bihh", z)
 }
 
 func (z ZipCode) GetValidCategories() []CategoryConfig {

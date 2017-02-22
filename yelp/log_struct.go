@@ -3,6 +3,7 @@ package yelp
 import (
 	"amasia/db"
 	"encoding/json"
+	"fmt"
 	"log"
 	"time"
 )
@@ -23,6 +24,9 @@ type LogConfigBusinessesSearch struct {
 	Alias  string
 	Limit  int
 	Offset int
+}
+
+type LogConfigZipCodeAnalysis struct {
 }
 
 func (l *Log) Insert() {
@@ -90,11 +94,31 @@ func (l Log) Update() {
 	l.ModifiedAt = now
 }
 
+func (l *Log) InitWithNewBusinessesSearch() {
+	var zc = ZipCode{ZipCode: l.ZipCode}
+	zc.InitWithZipCode()
+	filteredCategories := zc.GetValidCategories()
+
+	lgc := LogConfigBusinessesSearch{Alias: filteredCategories[0].Alias, Limit: 50, Offset: 0}
+	lgc_byte, err := json.Marshal(lgc)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	l.Id = 0
+	l.ZipCode = zc.ZipCode
+	l.Type = "businesses_search"
+	l.Config = lgc_byte
+	l.IsDone = false
+	l.Error = ""
+}
+
 func (l *Log) InitWithLatestBusinessesSearch() {
 	db := db.GetDB()
 	rows, err := db.Query(`
 		SELECT *
     FROM Log l
+		WHERE Type="businesses_search"
     ORDER BY IsDone ASC, ModifiedAt DESC
 		LIMIT 1
 		;
@@ -120,61 +144,116 @@ func (l *Log) InitWithLatestBusinessesSearch() {
 	rows.Close()
 }
 
-func (l *Log) InitWithNextLog() {
-	var zc = ZipCode{ZipCode: l.ZipCode}
+func (l *Log) InitWithNotDoneZipCodeAnalysis() {
+	db := db.GetDB()
+	rows, err := db.Query(`
+		SELECT *
+    FROM Log l
+		WHERE Type="zip_code_analysis"
+		AND IsDone=false
+		LIMIT 1
+		;
+	`)
 
-	zc.InitWithZipCode()
-	lgc := l.GetConfigBusinessesSearch()
-	filteredCategories := zc.GetValidCategories()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
 
-	var i int
-	var c CategoryConfig
-	if l.IsDoneCategory {
-		for i, c = range filteredCategories {
-			if c.Alias == lgc.Alias {
-				break
-			}
+	for rows.Next() {
+		err := rows.Scan(&l.Id, &l.ZipCode, &l.Type, &l.Config, &l.IsDone, &l.Error, &l.CreatedAt, &l.ModifiedAt)
+		if err != nil {
+			log.Fatal(err)
 		}
-
-		lgc = LogConfigBusinessesSearch{Alias: filteredCategories[i+1].Alias, Limit: 50, Offset: 0}
-	} else {
-		lgc = LogConfigBusinessesSearch{Alias: lgc.Alias, Limit: 50, Offset: (lgc.Offset + 50)}
 	}
 
-	lgc_byte, err := json.Marshal(lgc)
+	err = rows.Err()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	l.Id = 0
-	l.ZipCode = zc.ZipCode
-	l.Type = "businesses_search"
-	l.Config = lgc_byte
-	l.IsDone = false
-	l.Error = ""
+	rows.Close()
 }
 
-func (l *Log) InitWithNewBusinessesSearch() {
+func (l *Log) InitWithNextLog() {
+	nextType := "businesses_search"
 	var zc = ZipCode{ZipCode: l.ZipCode}
 	zc.InitWithZipCode()
-	filteredCategories := zc.GetValidCategories()
 
-	lgc := LogConfigBusinessesSearch{Alias: filteredCategories[0].Alias, Limit: 50, Offset: 0}
-	lgc_byte, err := json.Marshal(lgc)
-	if err != nil {
-		log.Fatal(err)
+	var lgcbs LogConfigBusinessesSearch
+	var lgcza LogConfigZipCodeAnalysis
+
+	switch l.Type {
+	case "businesses_search":
+		lgcbs := l.GetConfigBusinessesSearch()
+		filteredCategories := zc.GetValidCategories()
+
+		var i int
+		var c CategoryConfig
+		if l.IsDoneCategory {
+
+			for i, c = range filteredCategories {
+				if c.Alias == lgcbs.Alias {
+					break
+				}
+			}
+
+			fmt.Println("i", i)
+			fmt.Println("len(filteredCategories)", len(filteredCategories))
+			if i+1 < len(filteredCategories) {
+				lgcbs = LogConfigBusinessesSearch{Alias: filteredCategories[i+1].Alias, Limit: 50, Offset: 0}
+			} else {
+				nextType = "zip_code_analysis"
+				lgcza = LogConfigZipCodeAnalysis{}
+			}
+
+		} else {
+			lgcbs = LogConfigBusinessesSearch{Alias: lgcbs.Alias, Limit: 50, Offset: (lgcbs.Offset + 50)}
+		}
+	case "zip_code_analysis":
+		nextType = "businesses_search"
+		zc.InitWithOldestBusinessesSearch()
+		l.ZipCode = zc.ZipCode
+		l.InitWithNewBusinessesSearch()
+		lgcbs = l.GetConfigBusinessesSearch()
 	}
 
 	l.Id = 0
 	l.ZipCode = zc.ZipCode
-	l.Type = "businesses_search"
-	l.Config = lgc_byte
+	l.Type = nextType
+
+	switch nextType {
+	case "businesses_search":
+		lgcbs_byte, err := json.Marshal(lgcbs)
+		if err != nil {
+			log.Fatal(err)
+		}
+		l.Config = lgcbs_byte
+	case "zip_code_analysis":
+		lgcza_byte, err := json.Marshal(lgcza)
+		if err != nil {
+			log.Fatal(err)
+		}
+		l.Config = lgcza_byte
+	}
+
 	l.IsDone = false
 	l.Error = ""
 }
 
 func (l Log) GetConfigBusinessesSearch() LogConfigBusinessesSearch {
 	var lc LogConfigBusinessesSearch
+	// can i delete the []byte
+	err := json.Unmarshal(l.Config, &lc)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return lc
+}
+
+func (l Log) GetConfigZipCodeAnalysis() LogConfigZipCodeAnalysis {
+	var lc LogConfigZipCodeAnalysis
 	// can i delete the []byte
 	err := json.Unmarshal(l.Config, &lc)
 	if err != nil {
