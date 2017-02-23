@@ -37,14 +37,14 @@ func (z ZipCode) Analyze() {
 			JOIN Category yc ON yc.Alias=bc.CategoryAlias
 			JOIN CategoryTree yct ON yct.AliasLevel4=yc.Alias
 
-			AND b.LocationZipCode=78701
+			AND b.LocationZipCode=?
 
 			GROUP BY b.LocationZipCode, yct.AliasLevel4
 			ORDER BY b.LocationZipCode, Count DESC
 		) ON DUPLICATE KEY UPDATE
 		Count=Values(Count)
 		;
-	`)
+	`, z.ZipCode)
 
 	if err != nil {
 		log.Fatal(err)
