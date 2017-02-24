@@ -17,7 +17,7 @@ type ZipCode struct {
 	ModifiedAt            time.Time
 }
 
-func (z ZipCode) Analyze() {
+func (z ZipCode) RunAnalysis() {
 	db := db.GetDB()
 
 	_, err := db.Exec(`

@@ -208,8 +208,12 @@ func (l *Log) InitWithNextLog() {
 			lgcbs = LogConfigBusinessesSearch{Alias: lgcbs.Alias, Limit: 50, Offset: (lgcbs.Offset + 50)}
 		}
 	case "zip_code_analysis":
+	default:
 		nextType = "businesses_search"
-		zc.InitWithOldestBusinessesSearch()
+		zc.InitWithForceBusinessesSearch()
+		if zc.ZipCode == 0 {
+			zc.InitWithOldestBusinessesSearch()
+		}
 		l.ZipCode = zc.ZipCode
 		l.InitWithNewBusinessesSearch()
 		lgcbs = l.GetConfigBusinessesSearch()
