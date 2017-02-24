@@ -17,6 +17,34 @@ type ZipCode struct {
 	ModifiedAt            time.Time
 }
 
+func (z *ZipCode) Update() {
+	db := db.GetDB()
+	now := time.Now()
+	rows, err := db.Query(`
+		UPDATE ZipCode z
+		SET
+			z.City=?,
+			z.State=?,
+			z.Country=?,
+			z.ForceBusinessesSearch=?,
+			z.ModifiedAt=?
+		WHERE z.ZipCode=?
+		;
+	`, z.City, z.State, z.Country, z.ForceBusinessesSearch, now, z.ZipCode)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	err = rows.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rows.Close()
+	z.ModifiedAt = now
+}
+
 func (z ZipCode) RunAnalysis() {
 	db := db.GetDB()
 

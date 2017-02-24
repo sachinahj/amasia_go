@@ -65,7 +65,7 @@ func (l *Log) Insert() {
 	l.ModifiedAt = now
 }
 
-func (l Log) Update() {
+func (l *Log) Update() {
 	db := db.GetDB()
 	now := time.Now()
 	rows, err := db.Query(`
@@ -213,6 +213,9 @@ func (l *Log) InitWithNextLog() {
 		zc.InitWithForceBusinessesSearch()
 		if zc.ZipCode == 0 {
 			zc.InitWithOldestBusinessesSearch()
+		} else {
+			zc.ForceBusinessesSearch = false
+			zc.Update()
 		}
 		l.ZipCode = zc.ZipCode
 		l.InitWithNewBusinessesSearch()
