@@ -3,7 +3,7 @@ package yelp
 import "fmt"
 
 func Start() {
-	fmt.Println("=================================================")
+	fmt.Println("======================= Start ==========================")
 	var lg Log
 	var zc ZipCode
 
