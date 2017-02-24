@@ -14,6 +14,10 @@ import (
 type BusinessesSearchResponse struct {
 	Total      int64      `json:"total"`
 	Businesses []Business `json:"businesses"`
+	Error				struct {
+		Description string `json:"description"`
+		Code string `json:"code"`
+	} 		`json:"error"`
 }
 
 func BusinessesSearch(lg *Log) {
@@ -58,6 +62,11 @@ func BusinessesSearch(lg *Log) {
 	err = json.Unmarshal([]byte(body), &bsr)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	fmt.Println("bsr.Error.Code", bsr.Error.Code)
+	if bsr.Error.Code != "" {
+		log.Fatal(bsr.Error.Code)
 	}
 
 	if len(bsr.Businesses) <= 50 {

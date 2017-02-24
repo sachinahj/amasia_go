@@ -9,6 +9,8 @@ import (
 
 type ZipCode struct {
 	ZipCode               int
+	City                  string
+	State                 string
 	Country               string
 	ForceBusinessesSearch bool
 	CreatedAt             time.Time
@@ -19,7 +21,7 @@ func (z ZipCode) Analyze() {
 	db := db.GetDB()
 
 	_, err := db.Exec(`
-		INSERT INTO amasia.ZipCodeCategories
+		INSERT INTO amasia.ZipCodeCategoriesLevel4
 		(
       ZipCode,
       Alias,
@@ -44,7 +46,82 @@ func (z ZipCode) Analyze() {
 		) ON DUPLICATE KEY UPDATE
 		Count=Values(Count)
 		;
-	`, z.ZipCode)
+		INSERT INTO amasia.ZipCodeCategoriesLevel3
+		(
+      ZipCode,
+      Alias,
+      Count
+    )
+		(
+			SELECT
+			  b.LocationZipCode as ZipCode,
+			  yct.AliasLevel3 as Alias,
+			  count(yct.AliasLevel3) as Count
+
+			FROM Business b
+
+			JOIN BusinessCategory bc ON b.Id=bc.BusinessId
+			JOIN Category yc ON yc.Alias=bc.CategoryAlias
+			JOIN CategoryTree yct ON yct.AliasLevel3=yc.Alias
+
+			AND b.LocationZipCode=?
+
+			GROUP BY b.LocationZipCode, yct.AliasLevel3
+			ORDER BY b.LocationZipCode, Count DESC
+		) ON DUPLICATE KEY UPDATE
+		Count=Values(Count)
+		;
+		INSERT INTO amasia.ZipCodeCategoriesLevel2
+		(
+      ZipCode,
+      Alias,
+      Count
+    )
+		(
+			SELECT
+			  b.LocationZipCode as ZipCode,
+			  yct.AliasLevel2 as Alias,
+			  count(yct.AliasLevel2) as Count
+
+			FROM Business b
+
+			JOIN BusinessCategory bc ON b.Id=bc.BusinessId
+			JOIN Category yc ON yc.Alias=bc.CategoryAlias
+			JOIN CategoryTree yct ON yct.AliasLevel2=yc.Alias
+
+			AND b.LocationZipCode=?
+
+			GROUP BY b.LocationZipCode, yct.AliasLevel2
+			ORDER BY b.LocationZipCode, Count DESC
+		) ON DUPLICATE KEY UPDATE
+		Count=Values(Count)
+		;
+		INSERT INTO amasia.ZipCodeCategoriesLevel1
+		(
+      ZipCode,
+      Alias,
+      Count
+    )
+		(
+			SELECT
+			  b.LocationZipCode as ZipCode,
+			  yct.AliasLevel1 as Alias,
+			  count(yct.AliasLevel1) as Count
+
+			FROM Business b
+
+			JOIN BusinessCategory bc ON b.Id=bc.BusinessId
+			JOIN Category yc ON yc.Alias=bc.CategoryAlias
+			JOIN CategoryTree yct ON yct.AliasLevel1=yc.Alias
+
+			AND b.LocationZipCode=?
+
+			GROUP BY b.LocationZipCode, yct.AliasLevel1
+			ORDER BY b.LocationZipCode, Count DESC
+		) ON DUPLICATE KEY UPDATE
+		Count=Values(Count)
+		;
+	`, z.ZipCode, z.ZipCode, z.ZipCode, z.ZipCode)
 
 	if err != nil {
 		log.Fatal(err)
@@ -87,7 +164,7 @@ func (z *ZipCode) InitWithZipCode() {
 	defer rows.Close()
 
 	for rows.Next() {
-		err := rows.Scan(&z.ZipCode, &z.Country, &z.ForceBusinessesSearch, &z.CreatedAt, &z.ModifiedAt)
+		err := rows.Scan(&z.ZipCode, &z.City, &z.State, &z.Country, &z.ForceBusinessesSearch, &z.CreatedAt, &z.ModifiedAt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -132,7 +209,7 @@ func (z *ZipCode) InitWithOldestBusinessesSearch() {
 	defer rows.Close()
 
 	for rows.Next() {
-		err := rows.Scan(&z.ZipCode, &z.Country, &z.ForceBusinessesSearch, &z.CreatedAt, &z.ModifiedAt)
+		err := rows.Scan(&z.ZipCode, &z.City, &z.State, &z.Country, &z.ForceBusinessesSearch, &z.CreatedAt, &z.ModifiedAt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -161,7 +238,7 @@ func (z *ZipCode) InitWithForceBusinessesSearch() {
 	defer rows.Close()
 
 	for rows.Next() {
-		err := rows.Scan(&z.ZipCode, &z.Country, &z.ForceBusinessesSearch, &z.CreatedAt, &z.ModifiedAt)
+		err := rows.Scan(&z.ZipCode, &z.City, &z.State, &z.Country, &z.ForceBusinessesSearch, &z.CreatedAt, &z.ModifiedAt)
 		if err != nil {
 			log.Fatal(err)
 		}
