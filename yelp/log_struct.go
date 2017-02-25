@@ -3,6 +3,7 @@ package yelp
 import (
 	"amasia/db"
 	"encoding/json"
+	"fmt"
 	"log"
 	"time"
 )
@@ -211,10 +212,13 @@ func (l *Log) InitWithNextLog() {
 		fallthrough
 	default:
 		nextType = "businesses_search"
+		zc.ZipCode = 0;
 		zc.InitWithForceBusinessesSearch()
 		if zc.ZipCode == 0 {
 			zc.InitWithOldestBusinessesSearch()
+			fmt.Println("Next ZipCode through InitWithOldestBusinessesSearch", zc)
 		} else {
+			fmt.Println("Next ZipCode through InitWithForceBusinessesSearch", zc)
 			zc.ForceBusinessesSearch = false
 			zc.Update()
 		}

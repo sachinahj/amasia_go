@@ -14,10 +14,10 @@ import (
 type BusinessesSearchResponse struct {
 	Total      int64      `json:"total"`
 	Businesses []Business `json:"businesses"`
-	Error				struct {
+	Error      struct {
 		Description string `json:"description"`
-		Code string `json:"code"`
-	} 		`json:"error"`
+		Code        string `json:"code"`
+	} `json:"error"`
 }
 
 func BusinessesSearch(lg *Log) {

@@ -20,7 +20,7 @@ func Start() {
 
 		lg.InitWithLatestBusinessesSearch()
 
-		if lg.Id != 0  && !lg.IsDone {
+		if lg.Id != 0 && !lg.IsDone {
 			BusinessesSearch(&lg)
 			lg.IsDone = true
 			lg.Update()
