@@ -66,12 +66,11 @@ func (z ZipCode) RunAnalysis() {
 
 			JOIN BusinessCategory bc ON b.Id=bc.BusinessId
 			JOIN Category yc ON yc.Alias=bc.CategoryAlias
-			JOIN CategoryTree yct ON yct.AliasLevel1=yc.Alias
+			JOIN CategoryTree yct ON yct.AliasLevel4=yc.Alias
 
 			AND b.LocationZipCode=?
 
 			GROUP BY b.LocationZipCode, yct.AliasLevel1
-			ORDER BY b.LocationZipCode, Count DESC
 		) ON DUPLICATE KEY UPDATE
 		Count=Values(Count)
 	`, z.ZipCode)
@@ -97,12 +96,11 @@ func (z ZipCode) RunAnalysis() {
 
 			JOIN BusinessCategory bc ON b.Id=bc.BusinessId
 			JOIN Category yc ON yc.Alias=bc.CategoryAlias
-			JOIN CategoryTree yct ON yct.AliasLevel2=yc.Alias
+			JOIN CategoryTree yct ON yct.AliasLevel4=yc.Alias
 
 			AND b.LocationZipCode=?
 
 			GROUP BY b.LocationZipCode, yct.AliasLevel2
-			ORDER BY b.LocationZipCode, Count DESC
 		) ON DUPLICATE KEY UPDATE
 		Count=Values(Count)
 	`, z.ZipCode)
@@ -128,12 +126,11 @@ func (z ZipCode) RunAnalysis() {
 
 			JOIN BusinessCategory bc ON b.Id=bc.BusinessId
 			JOIN Category yc ON yc.Alias=bc.CategoryAlias
-			JOIN CategoryTree yct ON yct.AliasLevel3=yc.Alias
+			JOIN CategoryTree yct ON yct.AliasLevel4=yc.Alias
 
 			AND b.LocationZipCode=?
 
 			GROUP BY b.LocationZipCode, yct.AliasLevel3
-			ORDER BY b.LocationZipCode, Count DESC
 		) ON DUPLICATE KEY UPDATE
 		Count=Values(Count)
 	`, z.ZipCode)
@@ -164,7 +161,6 @@ func (z ZipCode) RunAnalysis() {
 			AND b.LocationZipCode=?
 
 			GROUP BY b.LocationZipCode, yct.AliasLevel4
-			ORDER BY b.LocationZipCode, Count DESC
 		) ON DUPLICATE KEY UPDATE
 		Count=Values(Count)
 	`, z.ZipCode)
