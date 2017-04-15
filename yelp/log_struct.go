@@ -212,7 +212,7 @@ func (l *Log) InitWithNextLog() {
 		fallthrough
 	default:
 		nextType = "businesses_search"
-		zc.ZipCode = 0;
+		zc.ZipCode = 0
 		zc.InitWithForceBusinessesSearch()
 		if zc.ZipCode == 0 {
 			zc.InitWithOldestBusinessesSearch()
