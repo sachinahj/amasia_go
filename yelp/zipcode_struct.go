@@ -61,13 +61,19 @@ func (z ZipCode) RunAnalysis() {
 			(
 		    ZipCode,
 		    Alias,
-		    Count
+		    Count,
+				AverageRating,
+				AverageReviewCount,
+				AveragePrice
 		  )
 			(
 				SELECT
 				  b.LocationZipCode as ZipCode,
 				  yct.AliasLevel%d as Alias,
-				  count(yct.AliasLevel%d) as Count
+				  count(yct.AliasLevel%d) as Count,
+					avg(b.Rating) as AverageRating,
+			    avg(b.ReviewCount) as AverageReviewCount,
+			    avg(b.Price) as AveragePrice
 
 				FROM Business b
 

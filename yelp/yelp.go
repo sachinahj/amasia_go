@@ -1,6 +1,8 @@
 package yelp
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func Start() {
 	fmt.Println("======================= Start ==========================")
@@ -31,4 +33,11 @@ func Start() {
 	lg.InitWithNextLog()
 	lg.Insert()
 	Start()
+}
+
+func Sandbox() {
+	var zc ZipCode
+	zc.ZipCode = 10027
+
+	zc.RunAnalysis()
 }

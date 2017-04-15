@@ -12,12 +12,7 @@ func main() {
 	fmt.Println("environment", environment)
 
 	if environment == "development" {
-		var zc yelp.ZipCode
-		zc.ZipCode = 10027
-
-		fmt.Println("zc.ZipCode", zc.ZipCode)
-		zc.RunAnalysis()
-
+		yelp.Sandbox()
 	} else {
 		yelp.Start()
 	}
