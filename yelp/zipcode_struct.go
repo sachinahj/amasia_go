@@ -1,8 +1,10 @@
 package yelp
 
 import (
+	"amasia/config"
 	"amasia/db"
 	"amasia/helpers"
+	"fmt"
 	"log"
 	"time"
 )
@@ -47,126 +49,43 @@ func (z *ZipCode) Update() {
 
 func (z ZipCode) RunAnalysis() {
 	db := db.GetDB()
-
 	var err error
-	_, err = db.Exec(`
-		INSERT INTO amasia.ZipCodeCategoriesLevel1
-		(
-      ZipCode,
-      Alias,
-      Count
-    )
-		(
-			SELECT
-			  b.LocationZipCode as ZipCode,
-			  yct.AliasLevel1 as Alias,
-			  count(yct.AliasLevel1) as Count
+	var query string
 
-			FROM Business b
+	var dbName = config.Get("database.main.database")
 
-			JOIN BusinessCategory bc ON b.Id=bc.BusinessId
-			JOIN Category yc ON yc.Alias=bc.CategoryAlias
-			JOIN CategoryTree yct ON yct.AliasLevel4=yc.Alias
+	for i := 1; i <= 4; i++ {
 
-			AND b.LocationZipCode=?
+		query = fmt.Sprintf(`
+			INSERT INTO %s.ZipCodeCategoriesLevel%d
+			(
+		    ZipCode,
+		    Alias,
+		    Count
+		  )
+			(
+				SELECT
+				  b.LocationZipCode as ZipCode,
+				  yct.AliasLevel%d as Alias,
+				  count(yct.AliasLevel%d) as Count
 
-			GROUP BY b.LocationZipCode, yct.AliasLevel1
-		) ON DUPLICATE KEY UPDATE
-		Count=Values(Count)
-	`, z.ZipCode)
+				FROM Business b
 
-	if err != nil {
-		log.Fatal(err)
-	}
+				JOIN BusinessCategory bc ON b.Id=bc.BusinessId
+				JOIN Category yc ON yc.Alias=bc.CategoryAlias
+				JOIN CategoryTree yct ON yct.AliasLevel4=yc.Alias
 
-	_, err = db.Exec(`
-		INSERT INTO amasia.ZipCodeCategoriesLevel2
-		(
-      ZipCode,
-      Alias,
-      Count
-    )
-		(
-			SELECT
-			  b.LocationZipCode as ZipCode,
-			  yct.AliasLevel2 as Alias,
-			  count(yct.AliasLevel2) as Count
+				AND b.LocationZipCode=%d
 
-			FROM Business b
+				GROUP BY b.LocationZipCode, yct.AliasLevel%d
+			) ON DUPLICATE KEY UPDATE
+			Count=Values(Count)
+		`, dbName, i, i, i, z.ZipCode, i)
 
-			JOIN BusinessCategory bc ON b.Id=bc.BusinessId
-			JOIN Category yc ON yc.Alias=bc.CategoryAlias
-			JOIN CategoryTree yct ON yct.AliasLevel4=yc.Alias
-
-			AND b.LocationZipCode=?
-
-			GROUP BY b.LocationZipCode, yct.AliasLevel2
-		) ON DUPLICATE KEY UPDATE
-		Count=Values(Count)
-	`, z.ZipCode)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = db.Exec(`
-		INSERT INTO amasia.ZipCodeCategoriesLevel3
-		(
-      ZipCode,
-      Alias,
-      Count
-    )
-		(
-			SELECT
-			  b.LocationZipCode as ZipCode,
-			  yct.AliasLevel3 as Alias,
-			  count(yct.AliasLevel3) as Count
-
-			FROM Business b
-
-			JOIN BusinessCategory bc ON b.Id=bc.BusinessId
-			JOIN Category yc ON yc.Alias=bc.CategoryAlias
-			JOIN CategoryTree yct ON yct.AliasLevel4=yc.Alias
-
-			AND b.LocationZipCode=?
-
-			GROUP BY b.LocationZipCode, yct.AliasLevel3
-		) ON DUPLICATE KEY UPDATE
-		Count=Values(Count)
-	`, z.ZipCode)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = db.Exec(`
-		INSERT INTO amasia.ZipCodeCategoriesLevel4
-		(
-			ZipCode,
-			Alias,
-			Count
-		)
-		(
-			SELECT
-				b.LocationZipCode as ZipCode,
-				yct.AliasLevel4 as Alias,
-				count(yct.AliasLevel4) as Count
-
-			FROM Business b
-
-			JOIN BusinessCategory bc ON b.Id=bc.BusinessId
-			JOIN Category yc ON yc.Alias=bc.CategoryAlias
-			JOIN CategoryTree yct ON yct.AliasLevel4=yc.Alias
-
-			AND b.LocationZipCode=?
-
-			GROUP BY b.LocationZipCode, yct.AliasLevel4
-		) ON DUPLICATE KEY UPDATE
-		Count=Values(Count)
-	`, z.ZipCode)
-
-	if err != nil {
-		log.Fatal(err)
+		_, err = db.Exec(query)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	_, err = db.Exec(`
@@ -190,7 +109,6 @@ func (z ZipCode) RunAnalysis() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 }
 
 func (z ZipCode) GetValidCategories() []CategoryConfig {
