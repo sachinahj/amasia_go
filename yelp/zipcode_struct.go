@@ -49,11 +49,48 @@ func (z *ZipCode) Update() {
 
 func (z ZipCode) RunAnalysis() {
 	db := db.GetDB()
+	now := time.Now()
 	var err error
 	var query string
 
 	var dbName = config.Get("database.main.database")
 
+	// transfer undocumented zip codes
+	_, err = db.Exec(`
+		INSERT INTO ZipCode
+		(
+		  ZipCode,
+		  City,
+		  State,
+		  Country,
+		  ForceBusinessesSearch,
+			CreatedAt,
+			ModifiedAt
+		)
+		(
+		  SELECT
+		    b.LocationZipCode as ZipCode,
+		    b.LocationCity as City,
+		    b.LocationState as State,
+		    b.LocationCountry as Country,
+		    0 as ForceBusinessesSearch,
+		    ? as CreatedAt,
+		    ? as ModifiedAt
+		  FROM Business b
+		  LEFT JOIN ZipCode z on b.LocationZipCode = b.ZipCode
+		  WHERE z.ZipCode IS NULL
+		  AND b.LocationZipCode > 10000
+		  AND b.LocationZipCode < 99999
+		  GROUP BY b.LocationZipCode
+		)
+		;
+	`, now, now)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// insert updated analysis into each ZipCodeCategoriesLevel table
 	for i := 1; i <= 4; i++ {
 
 		query = fmt.Sprintf(`
@@ -94,6 +131,7 @@ func (z ZipCode) RunAnalysis() {
 		}
 	}
 
+	// delete all BusinessCategory
 	_, err = db.Exec(`
 		DELETE BusinessCategory
 		FROM BusinessCategory
@@ -106,6 +144,7 @@ func (z ZipCode) RunAnalysis() {
 		log.Fatal(err)
 	}
 
+	// delete all Business
 	_, err = db.Exec(`
 		DELETE Business
 		FROM Business

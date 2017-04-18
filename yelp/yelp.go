@@ -37,7 +37,7 @@ func Start() {
 
 func Sandbox() {
 	var zc ZipCode
-	zc.ZipCode = 10027
+	zc.ZipCode = 11201
 
 	zc.RunAnalysis()
 }
