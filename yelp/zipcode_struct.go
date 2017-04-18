@@ -77,7 +77,7 @@ func (z ZipCode) RunAnalysis() {
 		    ? as CreatedAt,
 		    ? as ModifiedAt
 		  FROM Business b
-		  LEFT JOIN ZipCode z on b.LocationZipCode = b.ZipCode
+		  LEFT JOIN ZipCode z on z.ZipCode = b.LocationZipCode
 		  WHERE z.ZipCode IS NULL
 		  AND b.LocationZipCode > 10000
 		  AND b.LocationZipCode < 99999
